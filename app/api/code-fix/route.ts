@@ -279,26 +279,7 @@ async function* streamFixProcess(prompt: string, reasoningEffort: string) {
 export async function POST(req: Request) {
   try {
     // Extract issueName, issueDescription, currentCode, and reasoningEffort from the request payload.
-    const { issueName, issueDescription, currentCode, reasoningEffort } = await req.json();
-
-    // Query the tokenize endpoint using a combined query.
-    const tokenizeResponse = await fetch("http://localhost:3000/api/tokenize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "query", query: `${issueName}\n${issueDescription}` }),
-    });
-
-    if (!tokenizeResponse.ok) {
-      throw new Error(`Tokenize endpoint error: ${tokenizeResponse.statusText}`);
-    }
-
-    const tokenizeResult = await tokenizeResponse.json();
-    const relevantDocuments = tokenizeResult.results || [];
-    console.log("Relevant Documents:", relevantDocuments);
-    const additionalContext = relevantDocuments.map((doc: any) => doc.content).join("\n\n");
-
-    // Combine the current code context with the additional excerpts.
-    const fullContext = `${currentCode}\n\nRelevant Code Excerpts:\n${additionalContext}`;
+    const { issueName, issueDescription, context, reasoningEffort } = await req.json();
 
     // Construct a prompt that includes both the issue title and description, plus instructions for function calling.
     const prompt = `
@@ -306,8 +287,8 @@ You're a senior software engineer. You're tasked with generating a Python code f
 Issue Title: ${issueName}
 Issue Description: ${issueDescription}
 
-The current code context is provided below, along with relevant code excerpts:
-${fullContext}
+Context from the codebase:
+${context}
 
 Generate a Python code fix that resolves the issue. Additionally, generate a set of Python test cases to validate that the fix works correctly. Your response should be a function call to "run_python_code" with the parameters "code" and "testCases". 
 - "code" should contain only the Python code fix.
