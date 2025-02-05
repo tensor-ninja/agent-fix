@@ -75,7 +75,7 @@ const AgentBox: React.FC<AgentBoxProps> = ({ agent, isExpanded, onToggle, reason
         body: JSON.stringify({
           issueName: agent.title,
           issueDescription: agent.description,
-          currentCode: context,
+          context: context,
           reasoningEffort: reasoningEffort,
         }),
       });
