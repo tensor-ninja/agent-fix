@@ -23,6 +23,10 @@ const AgentBox: React.FC<AgentBoxProps> = ({ agent, isExpanded, onToggle, reason
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [finished, setFinished] = useState(false);
+  
+  // New state for handling status messages
+  const [status, setStatus] = useState("");
+
   // New state for handling relevant files locally:
   const [localRelevantFiles, setLocalRelevantFiles] = useState(
     agent.relevantFiles || []
@@ -35,6 +39,7 @@ const AgentBox: React.FC<AgentBoxProps> = ({ agent, isExpanded, onToggle, reason
 
   const handleStartFix = async () => {
     setLoading(true);
+    setStatus("Starting fix generation...");
     try {
       console.log("agent.description", agent.description);
       // Query for relevant documents using title and description.
@@ -88,11 +93,23 @@ const AgentBox: React.FC<AgentBoxProps> = ({ agent, isExpanded, onToggle, reason
         if (done) break;
         const chunk = decoder.decode(value);
         setOutput((prevOutput) => prevOutput + chunk);
+
+        // Update status based on certain keywords in the stream.
+        if (chunk.includes("Generated code fix")) {
+          setStatus("Code generated. Running test cases...");
+        } else if (chunk.includes("Test cases passed!")) {
+          setStatus("Test cases passed! Fix successful.");
+        } else if (chunk.includes("Test cases failed")) {
+          setStatus("Test cases failed. Retrying...");
+        } else if (chunk.includes("Final working fix")) {
+          setStatus("Final fix generated.");
+        }
       }
       setFinished(true);
     } catch (error: any) {
       console.error("Error during fix process:", error);
       setOutput("Error: " + error.message);
+      setStatus("Error during fix process.");
     } finally {
       setLoading(false);
     }
@@ -158,6 +175,12 @@ const AgentBox: React.FC<AgentBoxProps> = ({ agent, isExpanded, onToggle, reason
       {isExpanded && (
         <div className="mt-4 pl-9">
           <p className="text-sm text-gray-400">{agent.description}</p>
+          {/* Display status notifications */}
+          {status && (
+            <div className="mb-2 text-sm text-yellow-300">
+              <strong>Status:</strong> {status}
+            </div>
+          )}
           <pre className="bg-gray-900 p-3 rounded text-sm text-gray-300 whitespace-pre-wrap">
             {localRelevantFiles && localRelevantFiles.length > 0 && (
               <div className="mt-2">

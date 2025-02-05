@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Agent Fix
+
+Agent Fix is a Next.js application that leverages AI-powered agents to identify issues from a GitHub repository and automatically generate code fixes. By integrating with the OpenAI API and GitHub's REST endpoints, Agent Fix analyzes code files, tokenizes and indexes them, and then uses conversational AI to propose fixes along with automated testing.
+
+## Features
+
+- **Repository Analysis:**  
+  - Input a GitHub repository URL and fetch its open issues.
+  - Automatically download the repository's code files (Python and JavaScript).
+  
+- **Code Indexing & Embedding:**  
+  - Break code files into manageable chunks.
+  - Generate embeddings for each chunk using OpenAI's embeddings API for improved context retrieval.
+  
+- **AI-Powered Code Fixing:**  
+  - Each issue is assigned to an "agent" that generates a potential code fix.
+  - Uses a streaming response to display real-time progress and test execution logs.
+  - Automatically retries with improved suggestions if initial fixes fail the tests.
+
+- **Interactive Interface:**  
+  - Simple UI built with React and Tailwind CSS.
+  - Allows selection of "reasoning effort" (low, medium, or high) to guide the AI's code-fixing process.
+  - Displays detailed logs, relevant file excerpts, and final code fix results.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (v14+ recommended)
+- A GitHub token with permissions to access repository issues and contents.
+- An OpenAI API key.
+
+### Installation
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/your-username/agent-fix.git
+   cd agent-fix
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Environment Variables**
+
+   Create a `.env.local` file in the project root and add the following variables:
+
+   ```env
+   OPENAI_API_KEY=your_openai_api_key
+   GITHUB_TOKEN=your_github_token
+   ```
+
+4. **Run the Development Server**
+
+   ```bash
+   npm run dev
+   ```
+
+   The application will start on [http://localhost:3000](http://localhost:3000).
+
+## Usage
+
+1. Open the application in your browser.
+2. Enter the URL of a GitHub repository (e.g., `https://github.com/owner/repo`).
+3. Specify the number of issues to analyze and select the desired reasoning effort.
+4. Click **Load Repository**. The application will:
+   - Fetch open issues and repository files.
+   - Index code files by generating corresponding embeddings.
+   - Spawn agents that generate and test code fixes.
+5. Review agent logs and click on an agent to see detailed output and relevant code excerpts.
+
+## Architecture
+
+- **Frontend:**  
+  Built using React with Next.js. The main interface is located in the `app/page.tsx` file, with components for listing agents (`AgentList.tsx`) and displaying details (`AgentBox.tsx`).
+
+- **API Endpoints:**  
+  - `/api/tokenize`:  
+    Handles both indexing (creating embeddings for code files) and querying (retrieving relevant documents based on text search).
+  - `/api/code-fix`:  
+    Streams the code fix generation process using OpenAI's chat completions API and calls out to backend helpers for running tests on the generated Python code.
+
+- **AI Logic:**  
+  Uses OpenAI's `o3-mini` model to generate code fixes iteratively. The system can download missing dependencies, run Python test cases, and provide live updates on the fix status.
+
+## Testing the Endpoints
+
+A test script (`testEndpoints.js`) is included in the repository to help manually verify:
+- The tokenize (index and query) endpoints.
+- The code fix generation endpoint (including streaming).
+
+Run the test script using Node.js:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+node testEndpoints.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To build the application for production, run:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+Ensure all required environment variables are set on your deployment platform.
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Contributions, bug fixes, and feature improvements are welcome! Feel free to open issues or submit pull requests.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Commit your changes.
+4. Open a pull request.
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Distributed under the MIT License. See `LICENSE` for more information.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Acknowledgments
+
+- [Next.js](https://nextjs.org/)
+- [OpenAI API](https://openai.com/api/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- Inspired by the need to automate code improvements using AI-powered agents.

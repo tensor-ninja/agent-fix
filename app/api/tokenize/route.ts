@@ -149,14 +149,6 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-/**
- * The Next.js API route handler.
- * 
- * POST requests with action "index" and an array of files will build an embedding index.
- * POST requests with action "query" and a query string will compute the query embedding,
- * perform a vector (cosine similarity) search over the indexed files, 
- * and return the top 3 file candidates.
- */
 export async function POST(request: Request) {
   try {
     const { action, files, query } = await request.json();
